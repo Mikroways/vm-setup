@@ -1,0 +1,8 @@
+---
+all:
+  vars:
+    ansible_connection: local
+    ansible_user: "{{ lookup('env','USER')}}"
+    mw_tools_enabled: false
+  hosts:
+    localhost:

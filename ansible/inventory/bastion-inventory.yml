@@ -1,0 +1,19 @@
+---
+all:
+  vars:
+    ansible_user: "{{ lookup('env','USER')}}"
+  hosts:
+    bastion:
+      ansible_host: bastion-example.mikroways.net
+      mw_user_environment_tools_enabled: false
+      mw_user_environment_dotfiles_git_write_local_config: false
+      mw_user_environment_language_managers_enabled: false
+      mw_user_environment_krew_plugins_enabled: false
+      mw_user_environment_tf_plugins_enabled: false
+      mw_user_environment_helm_plugins_enabled: false
+      mw_user_environment_install_dotfiles: true
+      mw_podman_enabled: false
+      mw_docker_enabled: false
+      mw_tools_enabled: false
+      mw_workstation_local_packages_only:
+        - kubectl

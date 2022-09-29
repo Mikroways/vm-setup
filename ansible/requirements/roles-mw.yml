@@ -1,0 +1,5 @@
+- include: ansible/requirements/roles.yml
+- name: mikroways.tools
+  src: git@gitlab.com:mikroways/ansible/mikroways.tools.git
+  scm: git
+

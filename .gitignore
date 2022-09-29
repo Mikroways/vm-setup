@@ -1,0 +1,5 @@
+.vagrant
+*log
+TODO
+ansible/roles/
+.direnv/

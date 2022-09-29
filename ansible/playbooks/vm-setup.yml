@@ -1,0 +1,12 @@
+---
+- name: Install a Mikroways desktop bastion
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Run mikroways workstation
+      import_role:
+        name: mikroways.workstation
+    - name: Run mikroways tools
+      import_role:
+        name: mikroways.tools
+      when: mw_tools_enabled
