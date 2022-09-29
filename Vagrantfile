@@ -8,12 +8,9 @@ Vagrant.configure("2") do |config|
      vb.memory = "4096"
   end
     config.vm.provision :ansible do |ansible|
-        ansible.galaxy_role_file = "requirements.yml"
-        ansible.playbook = "vm-setup.yml"
-        ansible.raw_ssh_args = ['-o ForwardAgent=yes']
-        ansible.extra_vars = {
-          mw_user_environment_dotfiles_git_name: 'mikroways',
-          mw_user_environment_dotfiles_git_email: 'user@mikroways.net'
-        }
+        ansible.galaxy_role_file = "ansible/requirements/roles.yml"
+        ansible.playbook = "ansible/playbooks/vm-setup.yml"
+        ansible.raw_ssh_args = ["-o ForwardAgent=yes"]
+        ansible.extra_vars = { mw_tools_enabled: false }
     end
 end
