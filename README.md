@@ -68,10 +68,13 @@ actualización debemos ejecutar el siguiente comando:
 ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
 ```
 
-#### Consideraciones
+Si perteneces a Mikroways, entonces deberías además correr el siguiente playbook
 
-> Si se quieren instalar las herramientas privadas de mikroways se debe agregar
-> `-e mw_tools_enabled=true`
+```bash
+ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
+```
+
+#### Consideraciones
 
 > Si se está utilizando Pop!\_Os se debe agregar además
 > `-e ansible_distribution=Ubuntu`

@@ -3,6 +3,6 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: Run mikroways workstation
+    - name: Run mikroways tools
       import_role:
-        name: mikroways.workstation
+        name: mikroways.tools
