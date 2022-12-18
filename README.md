@@ -12,6 +12,7 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 
 * [direnv](https://direnv.net/)
 * [python3](https://www.python.org/downloads/)
+* [pyenv](https://github.com/pyenv/pyenv#installation)
 
 ## ¿Cómo utilizar?
 
@@ -20,6 +21,9 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 Primero se deben correr los siguientes comandos para instalar Ansible:
 
 ```bash
+## Instalamos la version de Python a utilizar
+pyenv install 3.9.9
+
 ## Creamos el entorno de Python con direnv
 direnv allow
 
