@@ -3,7 +3,7 @@
 Este repositorio es un playbook de ansible que deja listo un desktop para
 trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 
-* **mikroways.workstation:** role público con aplicaciones usadas y configuración
+* [**mikroways.workstation:**](https://galaxy.ansible.com/mikroways/workstation) role público con aplicaciones usadas y configuración
   del shell
 * **mikroways.tools:** role privado con un set de herramientas que usamos a
   diario y fueron exclusivamente desarrolladas por Mikroways. Es opcional.
