@@ -34,9 +34,6 @@ pip3 install -r requirements.txt
 Luego de instalar ansible, se deben instalar los requerimientos del playbook:
 
 ```bash
-## Instalamos las colecciones necesarias
-ansible-galaxy collection install -r ansible/requirements/collections.yml
-
 ## Si no pertenece a Mikroways ejecutamos el siguiente comando para instalar los roles
 ansible-galaxy role install -r ansible/requirements/roles.yml
 
@@ -49,9 +46,6 @@ Para actualizar los requerimientos:
 ```bash
 ## Actualizamos el repositorio
 git pull
-
-## Actualizamos las colecciones
-ansible-galaxy collection install -r ansible/requirements/collections.yml --force-with-deps
 
 ## Si no pertenece a Mikroways actualizamos roles con el siguiente comando:
 ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps
