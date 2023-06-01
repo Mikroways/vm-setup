@@ -8,15 +8,13 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 * **mikroways.tools:** role privado con un set de herramientas que usamos a
   diario y fueron exclusivamente desarrolladas por Mikroways. Es opcional.
 
-## Herramientas requeridas
+# Herramientas requeridas
 
 * [direnv](https://direnv.net/)
 * [python3](https://www.python.org/downloads/)
 * [pyenv](https://github.com/pyenv/pyenv#installation)
 
-## ¿Cómo utilizar?
-
-### Instalar roles y requerimientos
+# Instalar roles y requerimientos
 
 Primero se deben correr los siguientes comandos para instalar Ansible:
 
@@ -54,7 +52,7 @@ ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps
 ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps
 ```
 
-### Ejecutar playbook en local
+# Ejecutar playbook en local
 
 Antes de continuar, es recomendable realizar resguardos de toda configuración del
 usuario donde se ejecute el playbook o realizarlo en un usuario nuevo.
@@ -72,31 +70,49 @@ Si perteneces a Mikroways, entonces deberías además correr el siguiente playbo
 ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
 ```
 
-#### Consideraciones
+# Consideraciones
 
-> Si se está utilizando Pop!\_Os se debe agregar además
-> `-e ansible_distribution=Ubuntu`
+* Si se está utilizando Pop!\_Os se debe agregar además `-e ansible_distribution=Ubuntu`
 
-> Se aconseja probar el playbook con vagrant para verificar si el SO utilizado
-> funcionará con el playbook.
+* Se aconseja probar el playbook con vagrant para verificar si el SO utilizado
+ funcionará con el playbook.
 
-> Si ya utilizabas dotfiles, considerá subir tus cambios porque podrías perder
-> alguna de tus personalizaciones.
+* Si ya utilizabas dotfiles, considerá subir tus cambios porque podrías perder
+  alguna de tus personalizaciones.
 
-#### Funcionamiento
+# Funcionamiento
 
 El playbook sigue la siguiente serie de pasos:
 
-1. instala paquetes en el sistema tales como docker o podman utilizando el gestor
+1. Instala paquetes en el sistema tales como docker o podman utilizando el gestor
    de paquetes.
-1. instala herramientas especificas en el directorio: `~/.mikroways/bin` con un
+1. Instala herramientas especificas en el directorio: `~/.mikroways/bin` con un
    wrapper para descargar binarios.
-1. crea las configuraciones propias del entorno dejandolas a disposicion en el
+1. Configura [asdf](https://asdf-vm.com/) y prepara una serie de plugins y
+   versiones de productos.
+1. Crea las configuraciones propias del entorno dejandolas a disposicion en el
    directorio `~/.mikroways/dotfiles`.
-1. (opcional) si se indico la instalacion de las herramientas de Mikroways,
+1. (opcional) Si se indico la instalación de las herramientas de Mikroways,
    entonces estas se instalaran en la carpeta `~/.mikroways/tools`.
 
-## ¿Como probar el entorno en Vagrant?
+# Recomendaciones
+
+Una vez instalado tu desktop con este playbook, te recomendamos que agregues en
+`$HOME/.envrc` la siguiente configuración:
+
+```
+use asdf
+```
+
+De esta forma, la performance del uso de asdf se ve mejorada por no usar los
+shims sino la resolución del shim correspondiente.
+
+Por otro lado, si trabajando con **`kubectl`** deja de funcionar el
+autocomplete, entonces proveemos el alias **`mw-fix-kube-completion`** que
+debería actualizar el autocomplete que se suele romper entre diferentes
+versiones de kubectl que se manejan con asdf.
+
+# ¿Como probar el entorno en Vagrant?
 
 Simplemente correr:
 
