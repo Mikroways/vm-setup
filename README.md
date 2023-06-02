@@ -112,6 +112,21 @@ autocomplete, entonces proveemos el alias **`mw-fix-kube-completion`** que
 debería actualizar el autocomplete que se suele romper entre diferentes
 versiones de kubectl que se manejan con asdf.
 
+# Usar este playbook en un bastion
+
+Si querés usar directamente este playbook en una vm determinada, proponemos usar
+el siguiente comando:
+
+```
+ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
+  -i SOME_USER@10.10.10.10, \
+  -e ansible_user=SOME_USER
+```
+
+> Dependiendo del usuario remoto, en el ejemplo **SOME_USER**, debe ser
+> especificado tanto en la opción `-i` como en `ansible_user`. Además, para usar
+> un inventario inline es **fundamental el uso de la coma al final de la IP**.
+
 # ¿Como probar el entorno en Vagrant?
 
 Simplemente correr:
