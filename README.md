@@ -20,7 +20,10 @@ Primero se deben correr los siguientes comandos para instalar Ansible:
 
 ```bash
 ## Instalamos la version de Python a utilizar
-pyenv install 3.9.9
+pyenv install 3.11.11
+
+## Fijamos la version de Python a utilizar
+pyenv local 3.11.11
 
 ## Creamos el entorno de Python con direnv
 direnv allow
