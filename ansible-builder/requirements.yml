@@ -1,0 +1,7 @@
+roles:
+  - name: mikroways.workstation
+    version: 2.4.0
+
+collections:
+  - name: community.general
+    source: https://galaxy.ansible.com

@@ -1,0 +1,11 @@
+roles:
+  - name: mikroways.workstation
+    version: 2.4.0
+
+  - name: mikroways.tools
+    src: git+ssh://git@gitlab.com/mikroways/ansible/mikroways.tools.git
+    scm: git
+
+collections:
+  - name: community.general
+    source: https://galaxy.ansible.com

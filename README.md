@@ -138,3 +138,35 @@ vagrant up
 ## Para ingresar y verificar el entorno
 vagrant ssh
 ```
+
+# Uso con Execution Environments
+
+Este repositorio también puede ejecutarse dentro de un Ansible Execution Environment para evitar instalar dependencias en el host.
+Nota: Los siguientes comandos deben ejecutarse desde el directorio ansible-builder del repositorio.
+
+```bash
+## Si no pertenece a Mikroways ejecutamos el siguiente comando para construir la imagen pública
+ansible-builder build \
+  -c ./ansible-builder \
+  -t vm-setup-ee:latest
+
+## Si pertenece a Mikroways construimos la imagen privada con acceso SSH
+ansible-builder build \
+  -c ./ansible-builder \
+  -f execution-environment-mw.yml \
+  -t vm-setup-ee-mw:latest \
+  --ssh default=$HOME/.ssh/<tu_clave_ssh>
+
+```
+
+Ejecutar el playbook desde el contenedor
+```bash
+podman run --rm -it \
+  -v $(pwd)/ansible:/ansible:Z \
+  -v /ruta/en/host/a/tu/clave_ssh:/ansible/keys/private_key:ro \
+  vm-setup-ee:latest \
+  ansible-playbook /ansible/playbooks/<tu_playbook_seleccionado> \
+    -i USUARIO@IP_DEL_HOST, \
+    -e ansible_user=USUARIO \
+    -e ansible_ssh_private_key_file=/ansible/keys/private_key
+```
