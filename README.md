@@ -42,6 +42,13 @@ ansible-galaxy role install -r ansible/requirements/roles.yml
 ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 ```
 
+> **Nota:** Ansible ignora el `ansible.cfg` del repositorio si el directorio tiene
+> permisos de escritura para todos (world-writable). Para evitar el warning y que
+> se cargue la configuración correctamente, correr una vez:
+> ```bash
+> chmod o-w .
+> ```
+
 Para actualizar los requerimientos:
 
 ```bash
@@ -49,10 +56,10 @@ Para actualizar los requerimientos:
 git pull
 
 ## Si no pertenece a Mikroways actualizamos roles con el siguiente comando:
-ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps
+ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps --force
 
 ## Si pertenece a Mikroways actualizamos roles con el siguiente comando:
-ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps
+ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
 ```
 
 ## Ejecutar playbook en local
@@ -67,7 +74,7 @@ actualización debemos ejecutar el siguiente comando:
 ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
 ```
 
-Si perteneces a Mikroways, entonces deberías además correr el siguiente playbook
+Si perteneces a Mikroways, entonces deberías además correr el siguiente playbook:
 
 ```bash
 ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
@@ -140,4 +147,11 @@ vagrant up
 
 ## Para ingresar y verificar el entorno
 vagrant ssh
+```
+
+Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
+que la VM esté levantada:
+
+```bash
+vagrant provision --provision-with mw
 ```
