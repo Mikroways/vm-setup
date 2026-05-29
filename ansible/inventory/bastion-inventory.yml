@@ -1,18 +1,93 @@
 ---
+# Inventario de ejemplo para bastiones remotos. Ajustar según las necesidades
+# del equipo que va a usar la máquina.
+#
+# Variables disponibles y valores por defecto:
+# https://github.com/Mikroways/ansible-workstation/tree/master/defaults/main
 all:
   vars:
-    ansible_user: "{{ lookup('env','USER')}}"  # ajustar si el usuario remoto difiere del local
+    # Ajustar si el usuario remoto difiere del local
+    ansible_user: "{{ lookup('env','USER')}}"
   hosts:
     bastion:
       ansible_host: bastion-example.mikroways.net
-      mw_user_environment_tools_enabled: false
-      mw_user_environment_dotfiles_git_write_local_config: false
-      mw_user_environment_language_managers_enabled: false
-      mw_user_environment_krew_plugins_enabled: false
-      mw_user_environment_tf_plugins_enabled: false
-      mw_user_environment_helm_plugins_enabled: false
-      mw_user_environment_install_dotfiles: true
-      mw_podman_enabled: false
-      mw_docker_enabled: false
-      mw_workstation_local_packages_only:
-        - kubectl
+
+      # Docker no suele necesitarse en un bastion
+      workstation_docker_enabled: false
+
+      # Los dotfiles configuran zsh, aliases y el entorno de shell.
+      # En un bastion se suelen desactivar para evitar problemas de
+      # compatibilidad o configuración no deseada.
+      workstation_dotfiles_enabled: false
+
+      # Herramientas binarias a instalar (navi, govc, amtool, promtool, certinfo,
+      # gitlab-runner, fzf, sonobuoy). Por defecto instala todas.
+      # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/tools.yml
+      # Para limitar a las necesarias:
+      # workstation_tools_only:
+      #   - navi
+      #   - fzf
+      # OJO: workstation_tools_only: [] instala TODAS (lista vacía = sin filtro).
+      # Para no instalar ninguna hay que vaciar la lista superior
+      workstation_tools: []
+
+      # Herramientas de asdf a instalar.
+      # Por defecto instala todo el stack completo 
+      # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/asdf.yml
+      #
+      # NOTA: se usa "latest" como ejemplo pero en entornos de producción se
+      # recomienda pinear versiones específicas para evitar cambios inesperados,
+      # por ejemplo: version: ["1.31.0"]
+      workstation_asdf_tools:
+        kubectl:
+          version: [latest]
+        helm:
+          version: [latest]
+        krew:
+          version: [latest]
+        terraform:
+          version: [latest]
+        terragrunt:
+          version: [latest]
+        tflint:
+          version: [latest]
+        sops:
+          version: [latest]
+        age:
+          version: [latest]
+        jq:
+          version: [latest]
+        yq:
+          version: [latest]
+        direnv:
+          version: [latest]
+        awscli:
+          version: [latest]
+        sshuttle:
+          version: [latest]
+        teleport-ent:
+          version: [latest]
+
+      # Plugins de krew (kubectl)
+      # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/krew-plugins.yml
+      workstation_krew_plugins:
+        - ctx
+        - ns
+        - oidc-login
+        - view-secret
+        - access-matrix
+
+      # Plugins de Helm
+      # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/helm-plugins.yml
+      workstation_helm_plugins:
+        - name: diff
+          repo: https://github.com/databus23/helm-diff
+        - name: secrets
+          repo: https://github.com/jkroepke/helm-secrets
+
+      # Proxy (si el bastion está detrás de un proxy corporativo)
+      # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/proxy.yml
+      # workstation_proxy_enabled: true
+      # workstation_proxy_http: http://proxy.example.com:3128
+      # workstation_proxy_https: http://proxy.example.com:3128
+      # workstation_proxy_no_proxy: localhost,127.0.0.1,.example.com
