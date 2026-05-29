@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
 
   # Para probar vm-setup-mw.yml (herramientas privadas de Mikroways):
   #   vagrant provision --provision-with mw
-  config.vm.provision :ansible, run: "never", name: "mw" do |ansible|
+  config.vm.provision "mw", type: :ansible, run: "never" do |ansible|
     ansible.galaxy_role_file = "ansible/requirements/roles-mw.yml"
     ansible.playbook = "ansible/playbooks/vm-setup-mw.yml"
     ansible.raw_ssh_args = ["-o ForwardAgent=yes"]
