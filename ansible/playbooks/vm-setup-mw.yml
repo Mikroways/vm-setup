@@ -1,5 +1,5 @@
 ---
-- name: Install a Mikroways desktop bastion
+- name: Install Mikroways private tools
   hosts: all
   gather_facts: true
   tasks:
