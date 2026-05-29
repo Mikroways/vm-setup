@@ -45,6 +45,7 @@ ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 > **Nota:** Ansible ignora el `ansible.cfg` del repositorio si el directorio tiene
 > permisos de escritura para todos (world-writable). Para evitar el warning y que
 > se cargue la configuración correctamente, correr una vez:
+>
 > ```bash
 > chmod o-w .
 > ```
@@ -100,7 +101,7 @@ El playbook sigue la siguiente serie de pasos:
    wrapper para descargar binarios.
 1. Configura [asdf](https://asdf-vm.com/) y prepara una serie de plugins y
    versiones de productos.
-1. Crea las configuraciones propias del entorno dejandolas a disposicion en el
+1. Crea las configuraciones propias del entorno dejándolas a disposición en el
    directorio `~/.mikroways/dotfiles`.
 1. (opcional) Si se indico la instalación de las herramientas de Mikroways,
    entonces estas se instalaran en la carpeta `~/.mikroways/tools`.
