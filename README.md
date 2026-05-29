@@ -8,13 +8,13 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 * **mikroways.tools:** role privado con un set de herramientas que usamos a
   diario y fueron exclusivamente desarrolladas por Mikroways. Es opcional.
 
-# Herramientas requeridas
+## Herramientas requeridas
 
 * [direnv](https://direnv.net/)
 * [python3](https://www.python.org/downloads/)
 * [pyenv](https://github.com/pyenv/pyenv#installation)
 
-# Instalar roles y requerimientos
+## Instalar roles y requerimientos
 
 Primero se deben correr los siguientes comandos para instalar Ansible:
 
@@ -55,7 +55,7 @@ ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps
 ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps
 ```
 
-# Ejecutar playbook en local
+## Ejecutar playbook en local
 
 Antes de continuar, es recomendable realizar resguardos de toda configuración del
 usuario donde se ejecute el playbook o realizarlo en un usuario nuevo.
@@ -73,7 +73,7 @@ Si perteneces a Mikroways, entonces deberías además correr el siguiente playbo
 ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
 ```
 
-# Consideraciones
+## Consideraciones
 
 * Si se está utilizando Pop!\_Os se debe agregar además `-e ansible_distribution=Ubuntu`
 
@@ -83,7 +83,7 @@ ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhos
 * Si ya utilizabas dotfiles, considerá subir tus cambios porque podrías perder
   alguna de tus personalizaciones.
 
-# Funcionamiento
+## Funcionamiento
 
 El playbook sigue la siguiente serie de pasos:
 
@@ -98,12 +98,12 @@ El playbook sigue la siguiente serie de pasos:
 1. (opcional) Si se indico la instalación de las herramientas de Mikroways,
    entonces estas se instalaran en la carpeta `~/.mikroways/tools`.
 
-# Recomendaciones
+## Recomendaciones
 
 Una vez instalado tu desktop con este playbook, te recomendamos que agregues en
 `$HOME/.envrc` la siguiente configuración:
 
-```
+```bash
 use asdf
 ```
 
@@ -115,12 +115,12 @@ autocomplete, entonces proveemos el alias **`mw-fix-kube-completion`** que
 debería actualizar el autocomplete que se suele romper entre diferentes
 versiones de kubectl que se manejan con asdf.
 
-# Usar este playbook en un bastion
+## Usar este playbook en un bastion
 
 Si querés usar directamente este playbook en una vm determinada, proponemos usar
 el siguiente comando:
 
-```
+```bash
 ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
   -i SOME_USER@10.10.10.10, \
   -e ansible_user=SOME_USER
@@ -130,7 +130,7 @@ ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 > especificado tanto en la opción `-i` como en `ansible_user`. Además, para usar
 > un inventario inline es **fundamental el uso de la coma al final de la IP**.
 
-# ¿Como probar el entorno en Vagrant?
+## ¿Como probar el entorno en Vagrant?
 
 Simplemente correr:
 
