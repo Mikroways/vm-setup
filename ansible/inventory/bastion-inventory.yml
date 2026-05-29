@@ -1,7 +1,7 @@
 ---
 all:
   vars:
-    ansible_user: "{{ lookup('env','USER')}}"
+    ansible_user: "{{ lookup('env','USER')}}"  # ajustar si el usuario remoto difiere del local
   hosts:
     bastion:
       ansible_host: bastion-example.mikroways.net
@@ -14,6 +14,5 @@ all:
       mw_user_environment_install_dotfiles: true
       mw_podman_enabled: false
       mw_docker_enabled: false
-      mw_tools_enabled: false
       mw_workstation_local_packages_only:
         - kubectl
