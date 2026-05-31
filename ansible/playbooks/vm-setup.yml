@@ -1,5 +1,5 @@
 ---
-- name: Install a Mikroways desktop bastion
+- name: Install a Mikroways workstation
   hosts: all
   gather_facts: true
   tasks:
