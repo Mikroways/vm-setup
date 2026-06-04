@@ -8,28 +8,31 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 * **mikroways.tools:** role privado con un set de herramientas que usamos a
   diario y fueron exclusivamente desarrolladas por Mikroways. Es opcional.
 
-## Herramientas requeridas
-
-* [direnv](https://direnv.net/)
-* [python3](https://www.python.org/downloads/)
-* [pyenv](https://github.com/pyenv/pyenv#installation)
-
 ## Instalar roles y requerimientos
 
-Primero se deben correr los siguientes comandos para instalar Ansible:
+### Máquina limpia (sin asdf ni direnv)
+
+Instalar `uv`:
 
 ```bash
-## Instalamos la version de Python a utilizar
-pyenv install 3.11.11
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-## Fijamos la version de Python a utilizar
-pyenv local 3.11.11
+Crear el entorno e instalar Ansible:
 
-## Creamos el entorno de Python con direnv
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+### Máquina ya configurada (con asdf y direnv)
+
+```bash
+asdf plugin add uv   # si no está el plugin
+asdf install uv
 direnv allow
-
-## Instalamos Ansible en el entorno de Python
-pip3 install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 Luego de instalar ansible, se deben instalar los requerimientos del playbook:
