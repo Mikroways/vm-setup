@@ -1,4 +1,13 @@
 ---
+- name: Install a Mikroways workstation
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Run mikroways workstation
+      import_role:
+        name: mikroways.workstation
+      when: not (mw_tools_only | default(false) | bool)
+
 - name: Install Mikroways private tools
   hosts: all
   gather_facts: true
