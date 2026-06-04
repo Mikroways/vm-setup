@@ -151,9 +151,12 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 
 ## ¿Como probar el entorno en Vagrant?
 
-Simplemente correr:
+Vagrant necesita `ansible-playbook` disponible en el PATH. Activá el venv antes
+de correr cualquier comando de vagrant:
 
 ```bash
+source .venv/bin/activate
+
 ## Para crear la maquina virtual
 vagrant up
 
