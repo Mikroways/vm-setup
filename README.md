@@ -15,24 +15,21 @@ gestionado con `uv`. El procedimiento varía según el estado del equipo:
 
 ### Primera vez en una máquina nueva
 
-Si asdf y direnv no están instalados todavía (el propio playbook los instala),
-instalá `uv` directamente y activá el entorno a mano:
+Si `uv` no está instalado todavía (el propio playbook lo instala via asdf),
+instalalo directamente y luego instalá las dependencias:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+uv sync
 ```
 
-### Equipo con asdf y direnv
+### Equipo con asdf
 
-Si ya corriste este playbook antes, el propio playbook habrá instalado `uv` via
-asdf. El entorno se activa automáticamente al entrar al directorio:
+Si ya corriste este playbook antes, `uv` estará instalado via asdf y disponible
+directamente:
 
 ```bash
-direnv allow         # crea el venv y activa el entorno; solo la primera vez o cuando cambia el .envrc
-uv pip install -r requirements.txt
+uv sync
 ```
 
 Luego de instalar ansible, instalar los roles. `roles-mw.yml` ya incluye todo
@@ -41,10 +38,10 @@ un comando:
 
 ```bash
 ## Si no pertenece a Mikroways:
-ansible-galaxy role install -r ansible/requirements/roles.yml
+uv run ansible-galaxy role install -r ansible/requirements/roles.yml
 
 ## Si pertenece a Mikroways (incluye el comando anterior):
-ansible-galaxy role install -r ansible/requirements/roles-mw.yml
+uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 ```
 
 > **Nota:** Ansible ignora el `ansible.cfg` del repositorio si el directorio tiene
@@ -59,12 +56,13 @@ Para actualizar los roles:
 
 ```bash
 git pull
+uv sync
 
 ## Si no pertenece a Mikroways:
-ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps --force
+uv run ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps --force
 
 ## Si pertenece a Mikroways (incluye el comando anterior):
-ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
+uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
 ```
 
 ## Ejecutar playbook en local
@@ -77,17 +75,17 @@ actualización debemos ejecutar el siguiente comando:
 
 ```bash
 ## Si no pertenece a Mikroways:
-ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
+uv run ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
 
 ## Si pertenece a Mikroways (incluye el playbook anterior):
-ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
+uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
 ```
 
 Si ya tenés la workstation configurada y solo querés instalar o actualizar las
 herramientas privadas de Mikroways:
 
 ```bash
-ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K \
+uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K \
   -e mw_tools_only=true
 ```
 
@@ -142,7 +140,7 @@ Si querés usar directamente este playbook en una vm determinada, proponemos usa
 el siguiente comando:
 
 ```bash
-ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
+uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
   -i SOME_USER@10.10.10.10, \
   -e ansible_user=SOME_USER
 ```
