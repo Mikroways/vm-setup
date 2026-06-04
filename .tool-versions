@@ -1,1 +1,3 @@
+# Usado por asdf/pyenv. Con uv este archivo no es necesario — la versión
+# de Python se especifica en .python-version.
 python 3.11.11

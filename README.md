@@ -10,26 +10,26 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 
 ## Herramientas requeridas
 
-* [direnv](https://direnv.net/)
-* [python3](https://www.python.org/downloads/)
-* [pyenv](https://github.com/pyenv/pyenv#installation)
+* [uv](https://docs.astral.sh/uv/getting-started/installation/) — gestor de Python y paquetes
+* [direnv](https://direnv.net/) — opcional, para activar el entorno automáticamente al entrar al directorio
 
 ## Instalar roles y requerimientos
 
-Primero se deben correr los siguientes comandos para instalar Ansible:
+Instalar `uv` si no está instalado:
 
 ```bash
-## Instalamos la version de Python a utilizar
-pyenv install 3.11.11
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-## Fijamos la version de Python a utilizar
-pyenv local 3.11.11
+Instalar Ansible:
 
-## Creamos el entorno de Python con direnv
+```bash
+## Con direnv (recomendado): activar el entorno y luego instalar
 direnv allow
+uv pip install -r requirements.txt
 
-## Instalamos Ansible en el entorno de Python
-pip3 install -r requirements.txt
+## Sin direnv: instalar directamente en un venv
+uv venv && uv pip install -r requirements.txt
 ```
 
 Luego de instalar ansible, se deben instalar los requerimientos del playbook:
