@@ -23,14 +23,30 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-### Equipo con asdf
-
-Si ya corriste este playbook antes, `uv` estará instalado via asdf y disponible
-directamente:
+Opcionalmente, para evitar errores por rate limiting de GitHub durante la
+instalación de plugins de asdf, exportá el token antes de correr el playbook
+(ver [Token de GitHub](#token-de-github)):
 
 ```bash
+export GITHUB_API_TOKEN=...
+```
+
+### Equipo con asdf y direnv
+
+Si ya corriste este playbook antes, `uv` y `direnv` estarán instalados. Al entrar
+al directorio, direnv activa el entorno automáticamente:
+
+```bash
+## Opcional: configurar token de GitHub para evitar rate limiting
+cp .envrc.private.sample .envrc.private
+# editar .envrc.private y completar GITHUB_API_TOKEN
+
+direnv allow    # solo la primera vez o cuando cambie el .envrc
 uv sync
 ```
+
+Esto deja `ansible-playbook` disponible en el PATH sin necesidad de activar el
+venv manualmente. Vagrant también funciona directamente.
 
 Luego de instalar ansible, instalar los roles. `roles-mw.yml` ya incluye todo
 lo de `roles.yml`, por lo que los miembros de Mikroways solo necesitan correr
@@ -131,6 +147,26 @@ autocomplete, entonces proveemos el alias **`mw-fix-kube-completion`** que
 debería actualizar el autocomplete que se suele romper entre diferentes
 versiones de kubectl que se manejan con asdf.
 
+## Token de GitHub
+
+El token puede ser **Classic** o **Fine-grained**. Para este uso no se necesita
+ningún scope ni permiso — solo autenticación.
+
+> **Nota**: La organización Mikroways bloquea fine-grained tokens con lifetime
+> mayor a 366 días. Si usás fine-grained, configurá máximo 365 días de expiración.
+
+* **Classic**: [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+  * _Note_: `mw-asdf-rate-limit`
+  * _Expiration_: No expiration
+  * Sin seleccionar ningún scope
+
+* **Fine-grained**: [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new)
+  * _Token name_: `mw-asdf-rate-limit`
+  * _Description_: `Token para evitar rate limiting de GitHub al instalar plugins de asdf`
+  * _Expiration_: 365 days
+  * _Repository access_: Public repositories
+  * Sin permisos adicionales
+
 ## Usar este playbook en un bastion
 
 Ansible corre desde tu equipo y se conecta al destino vía SSH. El equipo destino
@@ -151,18 +187,16 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 
 ## ¿Como probar el entorno en Vagrant?
 
-Vagrant necesita `ansible-playbook` disponible en el PATH. Activá el venv antes
-de correr cualquier comando de vagrant:
-
 ```bash
-source .venv/bin/activate
-
 ## Para crear la maquina virtual
 vagrant up
 
 ## Para ingresar y verificar el entorno
 vagrant ssh
 ```
+
+> Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
+> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:

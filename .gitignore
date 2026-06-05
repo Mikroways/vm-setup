@@ -5,3 +5,4 @@ ansible/playbooks/roles/
 ansible/roles/
 .direnv/
 .venv/
+.envrc.private

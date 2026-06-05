@@ -1,0 +1,6 @@
+# Copiar este archivo a .envrc.private y completar los valores.
+# .envrc.private está en .gitignore y nunca se commitea.
+
+# Token de GitHub para evitar rate limiting al instalar plugins de asdf.
+# Crear en https://github.com/settings/tokens (sin scopes necesarios).
+# export GITHUB_API_TOKEN=github_pat_...
