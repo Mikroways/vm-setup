@@ -185,6 +185,54 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 > especificado tanto en la opción `-i` como en `ansible_user`. Además, para usar
 > un inventario inline es **fundamental el uso de la coma al final de la IP**.
 
+## Uso con Execution Environments
+
+Los Execution Environments (EE) permiten correr los playbooks desde un contenedor
+sin instalar ansible en el host. Son ideales para **hosts remotos**. Para
+localhost tienen limitaciones (BECOME/sudo desde un contenedor).
+
+### Prerequisitos
+
+```bash
+uv run pip install ansible-builder ansible-navigator
+```
+
+### Build
+
+```bash
+## Imagen pública (solo mikroways.workstation):
+ansible-builder build -c ansible-builder \
+  -f ansible-builder/execution-environment.yml \
+  -t vm-setup-ee:latest
+
+## Imagen privada Mikroways (incluye mikroways.tools):
+ansible-builder build -c ansible-builder \
+  -f ansible-builder/execution-environment-mw.yml \
+  -t vm-setup-ee-mw:latest \
+  --ssh default=$HOME/.ssh/id_ed25519
+```
+
+### Uso contra hosts remotos
+
+```bash
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --eei vm-setup-ee:latest \
+  -i SOME_USER@10.10.10.10, \
+  -e ansible_user=SOME_USER \
+  --mode stdout
+```
+
+### Uso con localhost (con limitaciones)
+
+```bash
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --eei vm-setup-ee:latest \
+  -i ansible/inventory/localhost.yml \
+  --execution-environment-volume-mounts "$(pwd)/ansible:/ansible:z" \
+  --mode stdout \
+  -- -K
+```
+
 ## ¿Como probar el entorno en Vagrant?
 
 ```bash
