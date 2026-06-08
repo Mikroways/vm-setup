@@ -17,6 +17,7 @@ Vagrant.configure("2") do |config|
     ansible.extra_vars = {
       ansible_user: "vagrant",
       ansible_python_interpreter: "/usr/bin/python3",
+      workstation_github_api_token: ENV["GITHUB_API_TOKEN"] || "",
     }
   end
 
@@ -28,7 +29,8 @@ Vagrant.configure("2") do |config|
     ansible.raw_ssh_args = ["-o ForwardAgent=yes"]
     ansible.extra_vars = {
       ansible_user: "vagrant",
-      ansible_python_interpreter: "/usr/bin/python3"
+      ansible_python_interpreter: "/usr/bin/python3",
+      workstation_github_api_token: ENV["GITHUB_API_TOKEN"] || "",
     }
   end
 end

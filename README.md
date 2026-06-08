@@ -8,38 +8,56 @@ trabajar inmediatamente luego de correrlo. Al momento, depende de dos roles:
 * **mikroways.tools:** role privado con un set de herramientas que usamos a
   diario y fueron exclusivamente desarrolladas por Mikroways. Es opcional.
 
-## Herramientas requeridas
-
-* [direnv](https://direnv.net/)
-* [python3](https://www.python.org/downloads/)
-* [pyenv](https://github.com/pyenv/pyenv#installation)
-
 ## Instalar roles y requerimientos
 
-Primero se deben correr los siguientes comandos para instalar Ansible:
+Para correr los playbooks se necesita Ansible instalado en un entorno virtual Python,
+gestionado con `uv`. El procedimiento varía según el estado del equipo:
+
+### Primera vez en una máquina nueva
+
+Si `uv` no está instalado todavía (el propio playbook lo instala via asdf),
+instalalo directamente y luego instalá las dependencias:
 
 ```bash
-## Instalamos la version de Python a utilizar
-pyenv install 3.11.11
-
-## Fijamos la version de Python a utilizar
-pyenv local 3.11.11
-
-## Creamos el entorno de Python con direnv
-direnv allow
-
-## Instalamos Ansible en el entorno de Python
-pip3 install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
-Luego de instalar ansible, se deben instalar los requerimientos del playbook:
+Opcionalmente, para evitar errores por rate limiting de GitHub durante la
+instalación de plugins de asdf, exportá el token antes de correr el playbook
+(ver [Token de GitHub](#token-de-github)):
 
 ```bash
-## Si no pertenece a Mikroways ejecutamos el siguiente comando para instalar los roles
-ansible-galaxy role install -r ansible/requirements/roles.yml
+export GITHUB_API_TOKEN=...
+```
 
-## Si pertenece a Mikroways ejecutamos el siguiente comando para instalar los roles
-ansible-galaxy role install -r ansible/requirements/roles-mw.yml
+### Equipo con asdf y direnv
+
+Si ya corriste este playbook antes, `uv` y `direnv` estarán instalados. Al entrar
+al directorio, direnv activa el entorno automáticamente:
+
+```bash
+## Opcional: configurar token de GitHub para evitar rate limiting
+cp .envrc.private.sample .envrc.private
+# editar .envrc.private y completar GITHUB_API_TOKEN
+
+direnv allow    # solo la primera vez o cuando cambie el .envrc
+uv sync
+```
+
+Esto deja `ansible-playbook` disponible en el PATH sin necesidad de activar el
+venv manualmente. Vagrant también funciona directamente.
+
+Luego de instalar ansible, instalar los roles. `roles-mw.yml` ya incluye todo
+lo de `roles.yml`, por lo que los miembros de Mikroways solo necesitan correr
+un comando:
+
+```bash
+## Si no pertenece a Mikroways:
+uv run ansible-galaxy role install -r ansible/requirements/roles.yml
+
+## Si pertenece a Mikroways (incluye el comando anterior):
+uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 ```
 
 > **Nota:** Ansible ignora el `ansible.cfg` del repositorio si el directorio tiene
@@ -50,17 +68,17 @@ ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 > chmod o-w .
 > ```
 
-Para actualizar los requerimientos:
+Para actualizar los roles:
 
 ```bash
-## Actualizamos el repositorio
 git pull
+uv sync
 
-## Si no pertenece a Mikroways actualizamos roles con el siguiente comando:
-ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps --force
+## Si no pertenece a Mikroways:
+uv run ansible-galaxy role install -r ansible/requirements/roles.yml --force-with-deps --force
 
-## Si pertenece a Mikroways actualizamos roles con el siguiente comando:
-ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
+## Si pertenece a Mikroways (incluye el comando anterior):
+uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
 ```
 
 ## Ejecutar playbook en local
@@ -72,13 +90,19 @@ Para ejecutar el playbook en caso de que instalemos desde 0 o que realizemos una
 actualización debemos ejecutar el siguiente comando:
 
 ```bash
-ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
+## Si no pertenece a Mikroways:
+uv run ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
+
+## Si pertenece a Mikroways (incluye el playbook anterior):
+uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
 ```
 
-Si perteneces a Mikroways, entonces deberías además correr el siguiente playbook:
+Si ya tenés la workstation configurada y solo querés instalar o actualizar las
+herramientas privadas de Mikroways:
 
 ```bash
-ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K
+uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K \
+  -e mw_tools_only=true
 ```
 
 ## Consideraciones
@@ -123,13 +147,36 @@ autocomplete, entonces proveemos el alias **`mw-fix-kube-completion`** que
 debería actualizar el autocomplete que se suele romper entre diferentes
 versiones de kubectl que se manejan con asdf.
 
+## Token de GitHub
+
+El token puede ser **Classic** o **Fine-grained**. Para este uso no se necesita
+ningún scope ni permiso — solo autenticación.
+
+> **Nota**: La organización Mikroways bloquea fine-grained tokens con lifetime
+> mayor a 366 días. Si usás fine-grained, configurá máximo 365 días de expiración.
+
+* **Classic**: [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+  * _Note_: `mw-asdf-rate-limit`
+  * _Expiration_: No expiration
+  * Sin seleccionar ningún scope
+
+* **Fine-grained**: [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new)
+  * _Token name_: `mw-asdf-rate-limit`
+  * _Description_: `Token para evitar rate limiting de GitHub al instalar plugins de asdf`
+  * _Expiration_: 365 days
+  * _Repository access_: Public repositories
+  * Sin permisos adicionales
+
 ## Usar este playbook en un bastion
+
+Ansible corre desde tu equipo y se conecta al destino vía SSH. El equipo destino
+no necesita tener Ansible instalado.
 
 Si querés usar directamente este playbook en una vm determinada, proponemos usar
 el siguiente comando:
 
 ```bash
-ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
+uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
   -i SOME_USER@10.10.10.10, \
   -e ansible_user=SOME_USER
 ```
@@ -140,8 +187,6 @@ ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 
 ## ¿Como probar el entorno en Vagrant?
 
-Simplemente correr:
-
 ```bash
 ## Para crear la maquina virtual
 vagrant up
@@ -149,6 +194,9 @@ vagrant up
 ## Para ingresar y verificar el entorno
 vagrant ssh
 ```
+
+> Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
+> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:
