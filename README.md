@@ -48,8 +48,8 @@ uv sync
 Esto deja `ansible-playbook` disponible en el PATH sin necesidad de activar el
 venv manualmente. Vagrant también funciona directamente.
 
-Luego de instalar ansible, instalar los roles. `requirements-mw.yml` ya incluye todo
-lo de `requirements.yml`, por lo que los miembros de Mikroways solo necesitan correr
+Luego de instalar ansible, instalar los roles. `roles-mw.yml` ya incluye todo
+lo de `roles.yml`, por lo que los miembros de Mikroways solo necesitan correr
 un comando:
 
 ```bash
@@ -190,6 +190,18 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 Los Execution Environments (EE) permiten correr los playbooks desde un contenedor
 sin instalar ansible en el host.
 
+El archivo `ansible-navigator.yml` en la raíz del repositorio configura los
+defaults para todos los comandos `ansible-navigator`:
+
+* **Imagen**: `ghcr.io/mikroways/vm-setup:latest` (imagen pública, se pullea si hay
+  nueva versión en el registry)
+* **Modo**: `stdout` (output directo, sin TUI interactiva)
+* **Pull policy**: `tag` — con el tag `latest`, siempre verifica si hay una imagen
+  más nueva en el registry
+* **`GITHUB_API_TOKEN`**: si está definido en el entorno (via direnv o export,
+  ver [Token de GitHub](#token-de-github)), se pasa automáticamente al contenedor.
+  No hace falta agregarlo a ningún comando.
+
 ### Build
 
 ```bash
@@ -211,13 +223,11 @@ ansible-builder build -c ansible-builder \
 ### Uso contra hosts remotos
 
 ```bash
-## Usando la imagen publicada en ghcr.io:
+## Usando la imagen publicada en ghcr.io (default en ansible-navigator.yml):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
   --inventory SOME_USER@10.10.10.10, \
   --extra-vars ansible_user=SOME_USER \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"'
 
 ## Usando una imagen buildeada localmente:
 ansible-navigator run ansible/playbooks/vm-setup.yml \
@@ -225,8 +235,7 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
   --pull-policy never \
   --inventory SOME_USER@10.10.10.10, \
   --extra-vars ansible_user=SOME_USER \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"'
 ```
 
 ### Uso con localhost
@@ -236,15 +245,13 @@ al contenedor mismo y no al host real. Para configurar el host hay que forzar
 SSH con `--network=host` (requiere sshd corriendo en el host):
 
 ```bash
-## Usando la imagen publicada en ghcr.io:
+## Usando la imagen publicada en ghcr.io (default en ansible-navigator.yml):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
   --container-options='--network=host' \
   --inventory ansible/inventory/localhost.yml \
   --extra-vars ansible_connection=ssh \
   --extra-vars ansible_host=127.0.0.1 \
   --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout \
   -- -K
 
 ## Usando una imagen buildeada localmente:
@@ -256,7 +263,6 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
   --extra-vars ansible_connection=ssh \
   --extra-vars ansible_host=127.0.0.1 \
   --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout \
   -- -K
 ```
 
@@ -286,58 +292,27 @@ vagrant provision --provision-with mw
 ## Levantar la VM sin provision
 vagrant up --no-provision
 
-## Imagen pública — desde ghcr.io:
+## Imagen pública — desde ghcr.io (default en ansible-navigator.yml):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
   --container-options='--network=host' \
-  --inventory vagrant@127.0.0.1, \
-  --extra-vars ansible_user=vagrant \
-  --extra-vars ansible_port=2222 \
-  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
-  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout
+  --inventory ansible/inventory/vagrant.yml
 
 ## Imagen pública — buildeada localmente (ver Build):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
   --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
   --container-options='--network=host' \
-  --inventory vagrant@127.0.0.1, \
-  --extra-vars ansible_user=vagrant \
-  --extra-vars ansible_port=2222 \
-  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
-  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
-  --mode stdout
-
-## Imagen privada MW — desde ghcr.io (requiere podman login ghcr.io):
-## El agente SSH se monta en el contenedor para ForwardAgent hacia la VM.
-ansible-navigator run ansible/playbooks/vm-setup-mw.yml \
-  --execution-environment-image ghcr.io/mikroways/vm-setup-mw:latest \
-  --container-options='--network=host' \
-  --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
-  --pass-environment-variable SSH_AUTH_SOCK \
-  --inventory vagrant@127.0.0.1, \
-  --extra-vars ansible_user=vagrant \
-  --extra-vars ansible_port=2222 \
-  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
-  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes -o ForwardAgent=yes"' \
-  --mode stdout
+  --inventory ansible/inventory/vagrant.yml
 
 ## Imagen privada MW — buildeada localmente (ver Build):
+## SSH_AUTH_SOCK se monta en el contenedor para ForwardAgent hacia la VM,
+## necesario para que la VM autentique contra GitLab al clonar repos privados.
 ansible-navigator run ansible/playbooks/vm-setup-mw.yml \
   --execution-environment-image localhost/vm-setup-mw:latest \
   --pull-policy never \
   --container-options='--network=host' \
   --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
   --pass-environment-variable SSH_AUTH_SOCK \
-  --inventory vagrant@127.0.0.1, \
-  --extra-vars ansible_user=vagrant \
-  --extra-vars ansible_port=2222 \
-  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
-  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes -o ForwardAgent=yes"' \
-  --mode stdout
+  --inventory ansible/inventory/vagrant.yml \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes -o ForwardAgent=yes"'
 ```
