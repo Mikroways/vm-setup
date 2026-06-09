@@ -196,23 +196,23 @@ sin instalar ansible en el host.
 ## Imagen pública (solo mikroways.workstation):
 ansible-builder build -c ansible-builder \
   -f ansible-builder/execution-environment.yml \
-  -t vm-setup-ee:latest
+  -t vm-setup:latest
 
 ## Imagen privada Mikroways (incluye mikroways.tools):
-## PENDIENTE: ansible-builder no soporta SSH agent forwarding durante el build.
-## mikroways.tools se clona vía SSH desde GitLab, lo que requiere credenciales
-## dentro del contenedor de build. Esto solo es viable en un pipeline CI/CD
-## donde la clave SSH se inyecta como secreto.
+## Requiere la clave SSH privada que tiene acceso a GitLab.
+## La clave se inyecta como secreto de build y no queda en la imagen final
+## (solo existe en el stage intermedio "galaxy", que no se exporta).
 ansible-builder build -c ansible-builder \
   -f ansible-builder/execution-environment-mw.yml \
-  -t vm-setup-ee-mw:latest
+  -t vm-setup-mw:latest \
+  --extra-build-cli-args="--secret id=ssh_key,src=$HOME/.ssh/<tu-clave>"
 ```
 
 ### Uso contra hosts remotos
 
 ```bash
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image localhost/vm-setup-ee:latest \
+  --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
   --inventory SOME_USER@10.10.10.10, \
   --extra-vars ansible_user=SOME_USER \
@@ -228,7 +228,7 @@ SSH con `--network=host` (requiere sshd corriendo en el host):
 
 ```bash
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image localhost/vm-setup-ee:latest \
+  --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
   --container-options='--network=host' \
   --inventory ansible/inventory/localhost.yml \
@@ -269,7 +269,7 @@ vagrant up --no-provision
 
 ## Correr el playbook con EE apuntando a la VM
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --execution-environment-image localhost/vm-setup-ee:latest \
+  --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
   --container-options='--network=host' \
   --inventory vagrant@127.0.0.1, \
@@ -278,5 +278,22 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
   --extra-vars ansible_python_interpreter=/usr/bin/python3 \
   --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
   --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --mode stdout
+
+## Imagen privada Mikroways (requiere vm-setup-mw:latest buildeada):
+## El agente SSH del host se monta en el contenedor para que la VM vagrant
+## pueda clonar repos privados de GitLab vía ForwardAgent.
+ansible-navigator run ansible/playbooks/vm-setup-mw.yml \
+  --execution-environment-image localhost/vm-setup-mw:latest \
+  --pull-policy never \
+  --container-options='--network=host' \
+  --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
+  --pass-environment-variable SSH_AUTH_SOCK \
+  --inventory vagrant@127.0.0.1, \
+  --extra-vars ansible_user=vagrant \
+  --extra-vars ansible_port=2222 \
+  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
+  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes -o ForwardAgent=yes"' \
   --mode stdout
 ```

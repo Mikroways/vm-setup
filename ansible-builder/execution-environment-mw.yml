@@ -9,3 +9,13 @@ dependencies:
 
 options:
   workdir: null
+
+additional_build_steps:
+  prepend_galaxy:
+    - |
+      RUN --mount=type=secret,id=ssh_key \
+          mkdir -p /root/.ssh && \
+          cp /run/secrets/ssh_key /root/.ssh/gitlab_key && \
+          chmod 600 /root/.ssh/gitlab_key && \
+          ssh-keyscan gitlab.com >> /root/.ssh/known_hosts && \
+          printf 'Host gitlab.com\n  IdentityFile /root/.ssh/gitlab_key\n' >> /root/.ssh/config
