@@ -6,3 +6,6 @@ ansible/roles/
 .direnv/
 .venv/
 .envrc.private
+ansible-builder/_build/
+ansible-builder/Containerfile
+ansible/playbooks/*-artifact-*.json

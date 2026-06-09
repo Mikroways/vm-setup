@@ -188,14 +188,7 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 ## Uso con Execution Environments
 
 Los Execution Environments (EE) permiten correr los playbooks desde un contenedor
-sin instalar ansible en el host. Son ideales para **hosts remotos**. Para
-localhost tienen limitaciones (BECOME/sudo desde un contenedor).
-
-### Prerequisitos
-
-```bash
-uv run pip install ansible-builder ansible-navigator
-```
+sin instalar ansible en el host.
 
 ### Build
 
@@ -206,29 +199,42 @@ ansible-builder build -c ansible-builder \
   -t vm-setup-ee:latest
 
 ## Imagen privada Mikroways (incluye mikroways.tools):
+## PENDIENTE: ansible-builder no soporta SSH agent forwarding durante el build.
+## mikroways.tools se clona vía SSH desde GitLab, lo que requiere credenciales
+## dentro del contenedor de build. Esto solo es viable en un pipeline CI/CD
+## donde la clave SSH se inyecta como secreto.
 ansible-builder build -c ansible-builder \
   -f ansible-builder/execution-environment-mw.yml \
-  -t vm-setup-ee-mw:latest \
-  --ssh default=$HOME/.ssh/id_ed25519
+  -t vm-setup-ee-mw:latest
 ```
 
 ### Uso contra hosts remotos
 
 ```bash
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --eei vm-setup-ee:latest \
-  -i SOME_USER@10.10.10.10, \
-  -e ansible_user=SOME_USER \
+  --execution-environment-image localhost/vm-setup-ee:latest \
+  --pull-policy never \
+  --inventory SOME_USER@10.10.10.10, \
+  --extra-vars ansible_user=SOME_USER \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
   --mode stdout
 ```
 
-### Uso con localhost (con limitaciones)
+### Uso con localhost
+
+El inventario usa `ansible_connection: local`, que dentro del contenedor apunta
+al contenedor mismo y no al host real. Para configurar el host hay que forzar
+SSH con `--network=host` (requiere sshd corriendo en el host):
 
 ```bash
 ansible-navigator run ansible/playbooks/vm-setup.yml \
-  --eei vm-setup-ee:latest \
-  -i ansible/inventory/localhost.yml \
-  --execution-environment-volume-mounts "$(pwd)/ansible:/ansible:z" \
+  --execution-environment-image localhost/vm-setup-ee:latest \
+  --pull-policy never \
+  --container-options='--network=host' \
+  --inventory ansible/inventory/localhost.yml \
+  --extra-vars ansible_connection=ssh \
+  --extra-vars ansible_host=127.0.0.1 \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
   --mode stdout \
   -- -K
 ```
@@ -251,4 +257,26 @@ que la VM esté levantada:
 
 ```bash
 vagrant provision --provision-with mw
+```
+
+### Probar con Execution Environments
+
+Requiere haber buildeado la imagen previamente (ver [Build](#build)).
+
+```bash
+## Levantar la VM sin provision
+vagrant up --no-provision
+
+## Correr el playbook con EE apuntando a la VM
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --execution-environment-image localhost/vm-setup-ee:latest \
+  --pull-policy never \
+  --container-options='--network=host' \
+  --inventory vagrant@127.0.0.1, \
+  --extra-vars ansible_user=vagrant \
+  --extra-vars ansible_port=2222 \
+  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
+  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --mode stdout
 ```

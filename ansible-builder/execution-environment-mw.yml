@@ -5,4 +5,7 @@ images:
     name: ghcr.io/ansible/community-ansible-dev-tools:latest
 
 dependencies:
-  galaxy: ../ansible/requirements/roles-mw.yml
+  galaxy: requirements-mw.yml
+
+options:
+  workdir: null
