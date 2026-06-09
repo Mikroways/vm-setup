@@ -1,5 +1,9 @@
-- include: ansible/requirements/roles.yml
-- name: mikroways.tools
-  src: git@gitlab.com:mikroways/ansible/mikroways.tools.git
-  scm: git
+roles:
+  - name: mikroways.workstation
+    version: 2.7.2
+  - name: mikroways.tools
+    src: git@gitlab.com:mikroways/ansible/mikroways.tools.git
+    scm: git
 
+collections:
+  - name: community.general

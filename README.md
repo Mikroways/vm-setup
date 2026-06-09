@@ -48,8 +48,8 @@ uv sync
 Esto deja `ansible-playbook` disponible en el PATH sin necesidad de activar el
 venv manualmente. Vagrant también funciona directamente.
 
-Luego de instalar ansible, instalar los roles. `roles-mw.yml` ya incluye todo
-lo de `roles.yml`, por lo que los miembros de Mikroways solo necesitan correr
+Luego de instalar ansible, instalar los roles. `requirements-mw.yml` ya incluye todo
+lo de `requirements.yml`, por lo que los miembros de Mikroways solo necesitan correr
 un comando:
 
 ```bash
@@ -211,6 +211,15 @@ ansible-builder build -c ansible-builder \
 ### Uso contra hosts remotos
 
 ```bash
+## Usando la imagen publicada en ghcr.io:
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
+  --inventory SOME_USER@10.10.10.10, \
+  --extra-vars ansible_user=SOME_USER \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --mode stdout
+
+## Usando una imagen buildeada localmente:
 ansible-navigator run ansible/playbooks/vm-setup.yml \
   --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
@@ -227,6 +236,18 @@ al contenedor mismo y no al host real. Para configurar el host hay que forzar
 SSH con `--network=host` (requiere sshd corriendo en el host):
 
 ```bash
+## Usando la imagen publicada en ghcr.io:
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
+  --container-options='--network=host' \
+  --inventory ansible/inventory/localhost.yml \
+  --extra-vars ansible_connection=ssh \
+  --extra-vars ansible_host=127.0.0.1 \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --mode stdout \
+  -- -K
+
+## Usando una imagen buildeada localmente:
 ansible-navigator run ansible/playbooks/vm-setup.yml \
   --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
@@ -261,13 +282,23 @@ vagrant provision --provision-with mw
 
 ### Probar con Execution Environments
 
-Requiere haber buildeado la imagen previamente (ver [Build](#build)).
-
 ```bash
 ## Levantar la VM sin provision
 vagrant up --no-provision
 
-## Correr el playbook con EE apuntando a la VM
+## Imagen pública — desde ghcr.io:
+ansible-navigator run ansible/playbooks/vm-setup.yml \
+  --execution-environment-image ghcr.io/mikroways/vm-setup:latest \
+  --container-options='--network=host' \
+  --inventory vagrant@127.0.0.1, \
+  --extra-vars ansible_user=vagrant \
+  --extra-vars ansible_port=2222 \
+  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
+  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --mode stdout
+
+## Imagen pública — buildeada localmente (ver Build):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
   --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
@@ -280,9 +311,22 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
   --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
   --mode stdout
 
-## Imagen privada Mikroways (requiere vm-setup-mw:latest buildeada):
-## El agente SSH del host se monta en el contenedor para que la VM vagrant
-## pueda clonar repos privados de GitLab vía ForwardAgent.
+## Imagen privada MW — desde ghcr.io (requiere podman login ghcr.io):
+## El agente SSH se monta en el contenedor para ForwardAgent hacia la VM.
+ansible-navigator run ansible/playbooks/vm-setup-mw.yml \
+  --execution-environment-image ghcr.io/mikroways/vm-setup-mw:latest \
+  --container-options='--network=host' \
+  --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
+  --pass-environment-variable SSH_AUTH_SOCK \
+  --inventory vagrant@127.0.0.1, \
+  --extra-vars ansible_user=vagrant \
+  --extra-vars ansible_port=2222 \
+  --extra-vars ansible_python_interpreter=/usr/bin/python3 \
+  --extra-vars ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key \
+  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes -o ForwardAgent=yes"' \
+  --mode stdout
+
+## Imagen privada MW — buildeada localmente (ver Build):
 ansible-navigator run ansible/playbooks/vm-setup-mw.yml \
   --execution-environment-image localhost/vm-setup-mw:latest \
   --pull-policy never \

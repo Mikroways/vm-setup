@@ -1,2 +1,6 @@
-- name: mikroways.workstation
-  version: 2.7.2
+roles:
+  - name: mikroways.workstation
+    version: 2.7.2
+
+collections:
+  - name: community.general
