@@ -187,8 +187,10 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 
 ## Uso con Execution Environments
 
-Los Execution Environments (EE) permiten correr los playbooks desde un contenedor
-sin instalar ansible en el host.
+Los Execution Environments (EE) permiten correr los playbooks desde un contenedor.
+El contenedor incluye Ansible y todos los roles, por lo que no hace falta
+instalarlos en el host. `ansible-navigator` se instala como parte de las
+dependencias del proyecto (ver [Instalar roles y requerimientos](#instalar-roles-y-requerimientos)).
 
 El archivo `ansible-navigator.yml` en la raíz del repositorio configura los
 defaults para todos los comandos `ansible-navigator`:
