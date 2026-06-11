@@ -101,13 +101,18 @@ Si ya tenés la workstation configurada y solo querés instalar o actualizar las
 herramientas privadas de Mikroways:
 
 ```bash
-uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml -K \
-  -e mw_tools_only=true
+uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/localhost.yml \
+  -e mw_tools_only=true -K
 ```
 
 ## Consideraciones
 
-* Si se está utilizando Pop!\_Os se debe agregar además `-e ansible_distribution=Ubuntu`
+* Si se está utilizando Pop!\_OS, copiar el sample de host_vars y descomentar la variable:
+
+  ```bash
+  cp ansible/inventory/host_vars/localhost.yml.sample ansible/inventory/host_vars/localhost.yml
+  # editar y descomentar ansible_distribution: Ubuntu
+  ```
 
 * Se aconseja probar el playbook con vagrant para verificar si el SO utilizado
  funcionará con el playbook.
@@ -176,14 +181,16 @@ Si querés usar directamente este playbook en una vm determinada, proponemos usa
 el siguiente comando:
 
 ```bash
-uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
+uv run ansible-playbook ansible/playbooks/vm-setup.yml \
   -i SOME_USER@10.10.10.10, \
-  -e ansible_user=SOME_USER
+  -e ansible_user=SOME_USER \
+  -K
 ```
 
 > Dependiendo del usuario remoto, en el ejemplo **SOME_USER**, debe ser
 > especificado tanto en la opción `-i` como en `ansible_user`. Además, para usar
 > un inventario inline es **fundamental el uso de la coma al final de la IP**.
+> Si el usuario remoto tiene sudo sin contraseña, omitir `-K`.
 
 ## Uso con Execution Environments
 
@@ -203,6 +210,9 @@ defaults para todos los comandos `ansible-navigator`:
 * **`GITHUB_API_TOKEN`**: si está definido en el entorno (via direnv o export,
   ver [Token de GitHub](#token-de-github)), se pasa automáticamente al contenedor.
   No hace falta agregarlo a ningún comando.
+* **`enable-prompts`**: permite que el prompt interactivo de `-K` (contraseña de
+  sudo) sea visible y funcional. Sin esto, el prompt queda descartado internamente
+  y el comando se cuelga.
 
 ### Build
 
@@ -242,18 +252,16 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
 
 ### Uso con localhost
 
-El inventario usa `ansible_connection: local`, que dentro del contenedor apunta
-al contenedor mismo y no al host real. Para configurar el host hay que forzar
-SSH con `--network=host` (requiere sshd corriendo en el host):
+El inventario `localhost-ee.yml` usa conexión SSH al host real vía `--network=host`.
+El SSH agent del host se monta en el contenedor para autenticación (requiere sshd
+corriendo en el host):
 
 ```bash
 ## Usando la imagen publicada en ghcr.io (default en ansible-navigator.yml):
 ansible-navigator run ansible/playbooks/vm-setup.yml \
   --container-options='--network=host' \
-  --inventory ansible/inventory/localhost.yml \
-  --extra-vars ansible_connection=ssh \
-  --extra-vars ansible_host=127.0.0.1 \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
+  --inventory ansible/inventory/localhost-ee.yml \
   -- -K
 
 ## Usando una imagen buildeada localmente:
@@ -261,12 +269,14 @@ ansible-navigator run ansible/playbooks/vm-setup.yml \
   --execution-environment-image localhost/vm-setup:latest \
   --pull-policy never \
   --container-options='--network=host' \
-  --inventory ansible/inventory/localhost.yml \
-  --extra-vars ansible_connection=ssh \
-  --extra-vars ansible_host=127.0.0.1 \
-  --extra-vars 'ansible_ssh_extra_args="-o IdentitiesOnly=yes"' \
+  --container-options="--volume=$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" \
+  --inventory ansible/inventory/localhost-ee.yml \
   -- -K
 ```
+
+> Si el comando falla con "Too many authentication failures", el agente SSH tiene
+> más claves cargadas de las que sshd permite intentar. Solución:
+> `ssh-add -D && ssh-add ~/.ssh/id_rsa`
 
 ## ¿Como probar el entorno en Vagrant?
 
@@ -278,8 +288,9 @@ vagrant up
 vagrant ssh
 ```
 
-> Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
-> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
+> Si no tenés direnv activo, usar `uv run vagrant up` en lugar de `vagrant up`
+> a secas — `uv run` activa el venv y deja `ansible-playbook` disponible para
+> el provisioner.
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:
