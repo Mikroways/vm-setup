@@ -1,0 +1,12 @@
+---
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_host: 127.0.0.1
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: "{{ lookup('env', 'USER') }}"
+    ansible_ssh_extra_args: "-o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey -o NumberOfPasswordPrompts=0"
+    workstation_github_api_token: "{{ lookup('env', 'GITHUB_API_TOKEN') | default('') }}"
+
+  hosts:
+    localhost:

@@ -6,3 +6,8 @@ ansible/roles/
 .direnv/
 .venv/
 .envrc.private
+ansible/inventory/host_vars/
+!ansible/inventory/host_vars/localhost.yml.sample
+ansible-builder/_build/
+ansible-builder/Containerfile
+ansible/playbooks/*-artifact-*.json

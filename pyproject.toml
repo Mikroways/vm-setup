@@ -5,4 +5,6 @@ description = "Ansible playbook para configurar workstations de Mikroways"
 requires-python = ">=3.11.11"
 dependencies = [
     "ansible~=11.0",
+    "ansible-builder>=3.1.1",
+    "ansible-navigator>=26.4.0",
 ]

@@ -1,0 +1,6 @@
+# Copiar a localhost.yml y descomentar las variables necesarias.
+# Este archivo es ignorado por git — es configuración local del usuario.
+
+# Pop!_OS: el rol detecta la distribución como "Pop!_OS" pero las tareas
+# están escritas para Ubuntu. Esta variable lo corrige:
+# ansible_distribution: Ubuntu

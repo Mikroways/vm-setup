@@ -4,6 +4,7 @@ all:
     ansible_python_interpreter: /usr/bin/python3
     ansible_connection: local
     ansible_user: "{{ lookup('env','USER')}}"
+    workstation_github_api_token: "{{ lookup('env', 'GITHUB_API_TOKEN') | default('') }}"
 
   hosts:
     localhost:

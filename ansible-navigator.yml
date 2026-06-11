@@ -1,0 +1,12 @@
+ansible-navigator:
+  mode: stdout
+  enable-prompts: true
+  execution-environment:
+    image: ghcr.io/mikroways/vm-setup:latest
+    pull:
+      policy: tag
+    environment-variables:
+      pass:
+        - GITHUB_API_TOKEN
+        - USER
+        - SSH_AUTH_SOCK
