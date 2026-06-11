@@ -1,0 +1,8 @@
+---
+- name: Test become
+  hosts: all
+  become: true
+  tasks:
+    - name: Hello world
+      ansible.builtin.debug:
+        msg: "Hello from {{ ansible_user }} as {{ ansible_become_user | default('root') }} on {{ inventory_hostname }}"
