@@ -60,6 +60,18 @@ uv run ansible-galaxy role install -r ansible/requirements/roles.yml
 uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml
 ```
 
+> **Primera vez en una máquina nueva:** además de lo anterior, hace falta instalar
+> las dependencias propias del role `mikroways.workstation` (`geerlingguy.docker` y
+> `ruzickap.proxy_settings`), declaradas en su `meta/requirements.yml`. Estas no se
+> resuelven automáticamente al instalar `roles.yml`/`roles-mw.yml`, y sin ellas el
+> playbook falla con un error de tipo `role not found` al intentar configurar el
+> proxy o instalar docker. En una máquina donde ya corriste el playbook antes,
+> estas dependencias ya deberían estar instaladas:
+>
+> ```bash
+> uv run ansible-galaxy role install -r ansible/roles/mikroways.workstation/meta/requirements.yml
+> ```
+
 > **Nota:** Ansible ignora el `ansible.cfg` del repositorio si el directorio tiene
 > permisos de escritura para todos (world-writable). Para evitar el warning y que
 > se cargue la configuración correctamente, correr una vez:
