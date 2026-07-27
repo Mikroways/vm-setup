@@ -81,6 +81,14 @@ uv run ansible-galaxy role install -r ansible/requirements/roles.yml --force-wit
 uv run ansible-galaxy role install -r ansible/requirements/roles-mw.yml --force-with-deps --force
 ```
 
+> **Si el playbook falla con `the role 'X' was not found`:** puede deberse a una
+> instalación de roles anterior interrumpida. Cuando `ansible/roles/` ya tiene un
+> role instalado, `ansible-galaxy` lo saltea (`already installed, skipping`) y no
+> procesa sus dependencias, dejando el resto sin instalar. Solución: correr el
+> comando de actualización de arriba (`--force-with-deps --force`), o borrar
+> `ansible/roles/` por completo y reinstalar desde cero. Ver
+> [#15](https://github.com/Mikroways/vm-setup/issues/15).
+
 ## Ejecutar playbook en local
 
 Antes de continuar, es recomendable realizar resguardos de toda configuración del
