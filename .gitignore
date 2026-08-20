@@ -6,3 +6,4 @@ ansible/roles/
 .direnv/
 .venv/
 .envrc.private
+ansible/inventory/host_vars/
