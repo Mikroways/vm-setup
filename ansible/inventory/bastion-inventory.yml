@@ -20,8 +20,9 @@ all:
       # compatibilidad o configuración no deseada.
       workstation_dotfiles_enabled: false
 
-      # Herramientas binarias a instalar (navi, govc, amtool, promtool, certinfo,
-      # gitlab-runner, fzf, sonobuoy). Por defecto instala todas.
+      # Herramientas binarias a instalar (navi, govc, certinfo, fzf). Por defecto
+      # instala todas. Desde la 2.11.0 del rol, amtool, promtool, gitlab-runner y
+      # sonobuoy no vienen por defecto: para sumarlas, workstation_extra_tools.
       # Ver https://github.com/Mikroways/ansible-workstation/blob/main/defaults/main/tools.yml
       # Para limitar a las necesarias:
       # workstation_tools_only:
