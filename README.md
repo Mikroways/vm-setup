@@ -204,7 +204,8 @@ vagrant ssh
 ```
 
 > Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
-> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
+> caso corré vagrant a través de `uv`, que usa el venv del proyecto:
+> `uv run vagrant up`
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:
