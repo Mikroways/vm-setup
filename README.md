@@ -197,18 +197,81 @@ uv run ansible-playbook ansible/playbooks/vm-setup.yml [-K] \
 
 ```bash
 ## Para crear la maquina virtual
-vagrant up
+uv run vagrant up
 
 ## Para ingresar y verificar el entorno
 vagrant ssh
 ```
-
-> Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
-> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:
 
 ```bash
 vagrant provision --provision-with mw
+```
+
+## Uso en Windows con WSL2
+
+Es posible correr este setup desde Windows utilizando **WSL2 con Ubuntu**. Sin
+embargo, hay algunas consideraciones importantes a tener en cuenta.
+
+### Requisitos previos
+
+1. Tener WSL2 instalado con una distribución Ubuntu (20.04 o superior).
+2. Clonar el repositorio **dentro del filesystem de Linux**, no en `/mnt/c/` ni
+   ninguna ruta montada desde Windows.
+
+### ⚠️ Problema de permisos NTFS (`/mnt/c`)
+
+Si el repositorio se clona en `/mnt/c/Users/...` (filesystem de Windows montado
+vía NTFS), Ansible detectará que el directorio tiene permisos `777` e **ignorará
+el `ansible.cfg`**, lo que provoca que los roles no se encuentren y el playbook
+falle.
+
+Además, `direnv` también puede fallar debido a los permisos world-writable.
+
+**Solución:** Clonar siempre dentro del home de WSL:
+
+```bash
+cd ~
+git clone <url-del-repo> vm-setup
+cd vm-setup
+```
+
+### Habilitar systemd (necesario para Docker)
+
+Algunas tareas del playbook (como la configuración de Docker) requieren
+`systemd` activo. En WSL2, systemd **no está habilitado por defecto**.
+
+Para habilitarlo, editá (o creá) el archivo `/etc/wsl.conf` dentro de Ubuntu:
+
+```bash
+sudo tee /etc/wsl.conf > /dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
+```
+
+Luego, desde PowerShell o CMD en Windows, reiniciá la instancia WSL:
+
+```powershell
+wsl --shutdown
+```
+
+Volvé a abrir Ubuntu y verificá que systemd esté corriendo:
+
+```bash
+systemctl is-system-running
+```
+
+### Ejecutar el playbook en WSL2
+
+Una vez dentro del directorio correcto (en el filesystem de Linux) y con
+systemd habilitado, el flujo es idéntico al de Linux:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+uv run ansible-galaxy role install -r ansible/requirements/roles.yml
+uv run ansible-playbook ansible/playbooks/vm-setup.yml -i ansible/inventory/localhost.yml -K
 ```
