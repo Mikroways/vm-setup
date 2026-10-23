@@ -113,6 +113,39 @@ uv run ansible-playbook ansible/playbooks/vm-setup-mw.yml -i ansible/inventory/l
   -e mw_tools_only=true
 ```
 
+### Ejecutar localmente en Windows con WSL2
+
+En Windows, la forma soportada es correr el playbook dentro de una distribución
+**WSL2** (por ejemplo Ubuntu). Ansible no corre de forma nativa sobre Windows, y
+WSL1 no es suficiente: el playbook necesita un kernel Linux real.
+
+1. Instalar WSL2 y una distribución Linux (como administrador en PowerShell):
+
+   ```powershell
+   wsl --install
+   # Reiniciar si es la primera vez, y luego verificar:
+   wsl --set-default-version 2
+   ```
+
+2. Dentro de la distribución WSL2, clonar el repositorio y seguir los mismos
+   pasos que para Linux ([Ejecutar playbook en local](#ejecutar-playbook-en-local)):
+   instalar `uv`, correr `uv sync`, instalar los roles y ejecutar el playbook
+   contra `localhost`.
+
+   > **Importante:** el playbook se corre **sobre el sistema WSL2**, no sobre
+   > Windows. En consecuencia:
+   >
+   > * Instala las herramientas y dotfiles dentro de la distro WSL2 (por
+   >   ejemplo en `~/.mikroways`).
+   > * No modifica la instalación de Windows ni tu perfil de usuario de Windows.
+   > * Para trabajar de forma cómoda, cloná tus repos dentro del filesystem de
+   >   Linux (por ejemplo `~/proyectos`) y no bajo `/mnt/c/...`, que es mucho
+   >   más lento y puede dar problemas de permisos.
+
+3. Para usar las herramientas instaladas (asdf, docker/podman, kubectl, etc.)
+   abrí una terminal de la distro WSL2 y usá `zsh`, que es el shell configurado
+   por el playbook.
+
 ## Consideraciones
 
 * Si se está utilizando Pop!\_Os se debe agregar además `-e ansible_distribution=Ubuntu`
@@ -204,7 +237,8 @@ vagrant ssh
 ```
 
 > Si no tenés direnv activo, `ansible-playbook` no estará en el PATH. En ese
-> caso activá el venv antes: `source .venv/bin/activate && vagrant up`
+> caso corré vagrant a través de `uv`, que usa el venv del proyecto:
+> `uv run vagrant up`
 
 Para probar también las herramientas privadas de Mikroways (`vm-setup-mw.yml`), una vez
 que la VM esté levantada:
